@@ -16,8 +16,8 @@ def save_tracker(data):
     with open(TRACKER_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
-st.set_page_config("Konsum- & Einnahmetracker", page_icon="💊", layout="wide")
-st.title("💊📝 Konsum- & Einnahme-Tracker (nüchtern, lokal)")
+st.set_page_config("How High-tracker", page_icon="💊", layout="wide")
+st.title("💊📝 Konsum- & Einnahme-Tracker ")
 
 # Zeitraumwahl
 today = datetime.date.today()
