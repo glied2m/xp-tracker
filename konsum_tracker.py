@@ -53,7 +53,7 @@ if sel_str not in tracker:
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    st.subheader("Denicit‑Tabletten")
+    st.subheader("Denicit-Tabletten")
     tracker[sel_str]["denicit"] = st.number_input(
         "Tabletten heute", min_value=0, max_value=20, step=1,
         value=tracker[sel_str]["denicit"]
@@ -66,7 +66,7 @@ with col1:
     )
 
 with col2:
-    st.subheader("Weed‑Konsum nach Form (g)")
+    st.subheader("Weed-Konsum nach Form (g)")
     for form in FORMS:
         tracker[sel_str]["weed"][form] = st.number_input(
             f"{form} (g)", min_value=0.0, max_value=10.0, step=0.05,
@@ -111,26 +111,24 @@ for d in dates_month:
         row.append(entry["weed"].get(form, 0.0))
     hist.append(row)
 
-cols = ["Tag", "Denicit", "Zigaretten", "Kaffee/Tee", "Energydrink"] + [f"Weed: {f}" for f in FORMS]
+cols = ["Tag", "Denicit", "Zigaretten", "Kaffee/Tee", "Energydrink"] + [f"Weed_{f}" for f in FORMS]
 df = pd.DataFrame(hist, columns=cols).set_index("Tag")
 
 st.subheader("📅 Monatsübersicht (Tabelle)")
 st.dataframe(df, use_container_width=True)
 
 # --- Chart-Daten säubern & Spalten-Namen korrigieren ---
-# Erstelle eine Kopie für Charts, ersetze ":" und Leerzeichen
 df_chart = df.copy()
-df_chart.columns = [
-    col.replace(":", "").replace(" ", "_") for col in df_chart.columns
-]
-
-# Cast aller Spalten in numeric
+# already uses Weed_{form} naming, cast all to numeric
 for c in df_chart.columns:
     df_chart[c] = pd.to_numeric(df_chart[c], errors="coerce").fillna(0)
 
 # --- Monatsstatistik (Charts) ---
 st.subheader("📈 Monatsstatistik")
-chart_cols = st.columns(5 + len(FORMS))
+n_charts = 4 + len(FORMS)
+chart_cols = st.columns(n_charts)
+
+# Basis-Charts
 chart_cols[0].markdown("**Denicit**")
 chart_cols[0].bar_chart(df_chart["Denicit"])
 chart_cols[1].markdown("**Zigaretten**")
@@ -139,10 +137,12 @@ chart_cols[2].markdown("**Kaffee/Tee**")
 chart_cols[2].bar_chart(df_chart["Kaffee/Tee"])
 chart_cols[3].markdown("**Energydrink**")
 chart_cols[3].bar_chart(df_chart["Energydrink"])
+
+# Weed-Formen
 for idx, form in enumerate(FORMS):
     col_idx = 4 + idx
-    key = f"Weed{form}"
+    col_name = f"Weed_{form}"
     chart_cols[col_idx].markdown(f"**Weed ({form})**")
-    chart_cols[col_idx].bar_chart(df_chart[key])
+    chart_cols[col_idx].bar_chart(df_chart[col_name])
 
 st.caption("Alle Daten lokal in 'consumption_log.json' – Gramm pro Form & Koffein-Tracker.")
