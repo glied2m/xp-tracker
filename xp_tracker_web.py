@@ -17,14 +17,16 @@ def load_tasks():
 
 def load_xp_log():
     try:
-        return pd.read_csv(XP_LOG, sep=";", parse_dates=["Datum"])
+        df = pd.read_csv(XP_LOG, sep=";", parse_dates=["Datum"])
+        df["Datum"] = pd.to_datetime(df["Datum"], errors="coerce").dt.normalize()
+        return df.dropna(subset=["Datum"])
     except Exception:
         return pd.DataFrame(columns=["Datum","XP"])
 
 def save_xp_log(logdf):
     logdf.to_csv(XP_LOG, sep=";", index=False)
 
-# -------- Streamlit UI --------
+# --- Streamlit UI ---
 st.set_page_config(
     "XP Tracker", 
     page_icon="🧠", 
@@ -44,26 +46,26 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("🌑 XP-Tracker – Desktop Ansicht")
-st.caption("Web-App für Felix (2024) | Nachträgliche Bearbeitung & Chart")
+st.caption("Web-App für Felix | Mit Datumsauswahl & stabilem XP-Chart")
 
 tasks = load_tasks()
 logdf = load_xp_log()
 
 tage_de = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
 
-# --------- DATUMSAUSWAHL (default heute) ----------
+# --- Datumsauswahl (Standard heute, beliebig zurück) ---
 selected_date = st.date_input(
-    "Für welchen Tag Aufgaben & XP bearbeiten?", 
-    value=datetime.date.today(), 
+    "Für welchen Tag Aufgaben & XP bearbeiten?",
+    value=datetime.date.today(),
     min_value=datetime.date.today() - datetime.timedelta(days=30),
     max_value=datetime.date.today()
 )
 weekday_de = tage_de[selected_date.weekday()]
 
+# --- Eigener Checkbox-State pro Tag ---
 if "daily_state" not in st.session_state:
     st.session_state.daily_state = {}
 
-# Für jedes Datum ein eigener State (damit Checkboxen für verschiedene Tage getrennt sind!)
 def get_state_key(d):
     return f"done_{d.isoformat()}"
 
@@ -86,7 +88,7 @@ def calc_xp(date):
     keys = st.session_state.daily_state.get(get_state_key(date), set())
     for section, items in [
         ("Morgenroutine", tasks.get("Morgenroutine", [])),
-        (f"Wochentags-Quests ({weekday_de})", tasks.get("Wochenplan", {}).get(weekday_de, [])),
+        (f"Wochentags-Quests ({tage_de[date.weekday()]})", tasks.get("Wochenplan", {}).get(tage_de[date.weekday()], [])),
         ("Abendroutine", tasks.get("Abendroutine", [])),
         ("Nebenmissionen", tasks.get("Nebenmissionen", [])),
     ]:
@@ -96,7 +98,7 @@ def calc_xp(date):
                 xp += t['xp']
     return xp
 
-# ---------- 4 Spalten Layout ----------
+# --- 4 Spalten Layout ---
 col1, col2, col3, col4, col5 = st.columns([1.1,1.1,1.1,1.1,1.5], gap="small")
 with col1:
     show_tasks("Morgenroutine", tasks.get("Morgenroutine", []))
@@ -119,22 +121,23 @@ with col5:
         if cols[i].button(f"{reward['name']} ({reward['cost']} XP)", key=btn_key, disabled=not enabled):
             st.success("Eingelöst! 🎉")
     if st.button("🔄 XP für diesen Tag speichern/aktualisieren"):
-        # Im Log nach Datum überschreiben
-        logdf_new = logdf[logdf["Datum"].dt.date != selected_date] if not logdf.empty else logdf
+        # Nur EIN Eintrag pro Tag im Log!
+        logdf_new = logdf[logdf["Datum"] != pd.to_datetime(selected_date)] if not logdf.empty else logdf
         logdf_new = pd.concat([logdf_new, pd.DataFrame([{"Datum": selected_date, "XP": xp_today}])], ignore_index=True)
+        logdf_new["Datum"] = pd.to_datetime(logdf_new["Datum"], errors="coerce").dt.normalize()
+        logdf_new = logdf_new.dropna(subset=["Datum"]).drop_duplicates(subset=["Datum"], keep="last")
         save_xp_log(logdf_new)
         st.success(f"XP für {selected_date:%d.%m.%Y} gespeichert!")
     st.divider()
     st.markdown("<b>📊 XP-Wochenübersicht</b>", unsafe_allow_html=True)
+    # --- Chart-Block (ohne Duplikate!) ---
     all_log = pd.concat([logdf, pd.DataFrame([{"Datum": selected_date, "XP": xp_today}])], ignore_index=True)
-    all_log = all_log.drop_duplicates(subset=["Datum"], keep="last")
-    all_log["Datum"] = pd.to_datetime(all_log["Datum"], errors="coerce").dt.date
-    all_log = all_log.dropna(subset=["Datum"])
+    all_log["Datum"] = pd.to_datetime(all_log["Datum"], errors="coerce").dt.normalize()
+    all_log = all_log.dropna(subset=["Datum"]).drop_duplicates(subset=["Datum"], keep="last")
+    # Chart für letzte 7 Tage:
     week = all_log[
-        all_log["Datum"].apply(lambda d: d >= (datetime.date.today() - datetime.timedelta(days=6)))
+        all_log["Datum"] >= (pd.to_datetime(datetime.date.today() - datetime.timedelta(days=6)))
     ].set_index("Datum").sort_index()
-    chart = week["XP"].reindex(
-        pd.date_range(datetime.date.today() - datetime.timedelta(days=6), datetime.date.today()).date, fill_value=0
-    )
+    date_range = pd.date_range(datetime.date.today() - datetime.timedelta(days=6), datetime.date.today())
+    chart = week["XP"].reindex(date_range, fill_value=0)
     st.bar_chart(chart, use_container_width=True)
-
