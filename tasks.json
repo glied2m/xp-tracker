@@ -49,13 +49,13 @@
       {"task": "Freunde/Familie anrufen", "xp": 2}
     ],
     "Sonntag": [
-      {"task": "Wochenausblick & chillen", "xp": 2},
+      {"task": "Wochenausblick & chillen", "xp": 2}
     ]
   },
   "Nebenmissionen": [
     {"task": "Papierkram/Steuer (Monatsmission)", "xp": 15},
     {"task": "Keller für eBay vorbereiten", "xp": 10},
-    {"task": "Bewerbung schreiben/versenden", "xp": 20}  
+    {"task": "Bewerbung schreiben/versenden", "xp": 20},
     {"task": "Lautsprecher auf eBay stellen", "xp": 10},
     {"task": "Fitnessgeräte auf eBay stellen", "xp": 10},
     {"task": "Antrag für Führerscheinfinanzierung vorbereiten", "xp": 15},
