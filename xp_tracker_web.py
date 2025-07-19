@@ -57,7 +57,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("🌑 XP-Tracker – Web Edition (mit einmaligen Nebenmissionen)")
+st.title(" XP-Tracker ")
 st.caption("Web-App für Felix | Automatisch einmalige Nebenmissionen ausblenden")
 
 tasks = load_tasks()
