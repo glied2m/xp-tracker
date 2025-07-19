@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-XP‑Tracker für ADHS – optimiertes Layout mit Tabs, Farb‑Hervorhebung wichtiger Tasks & Reminder‑Funktion
+XP‑Tracker für ADHS – optimiertes Layout mit Tabs, Farb‑Hervorhebung wichtiger Tasks, Reminder‑Funktion & Wochentags‑Quests
 Speichern als xp_tracker_web.py und starten mit: streamlit run xp_tracker_web.py
 """
 
@@ -70,7 +70,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("XP‑Tracker 🚀")
-st.caption("Morgen / Abend / Nebenmissionen · Wichtige Tasks & Erinnerungen")
+st.caption("Morgen / Wochentags‑Quests / Abend / Nebenmissionen · Wichtige Tasks & Erinnerungen")
 
 # ——— Daten laden ———
 tasks = load_tasks()
@@ -128,18 +128,27 @@ def task_item(name, xp, is_neben=False):
 
     return xp if cb else 0
 
-# ——— Tabs für Morgen / Abend / Nebenmissionen ———
-tabs = st.tabs(["Morgenroutine", "Abendroutine", "Nebenmissionen"])
-# Morgen
+# ——— Tabs für Morgen / Wochentags‑Quests / Abend / Nebenmissionen ———
+tabs = st.tabs(["Morgenroutine", f"Wochentags‑Quests ({weekday})", "Abendroutine", "Nebenmissionen"])
+
+# Morgenroutine
 with tabs[0]:
     st.header("🌅 Morgenroutine")
     xp_m = sum(task_item(t["task"], t["xp"]) for t in tasks.get("Morgenroutine", []))
-# Abend
+
+# Wochentags‑Quests
 with tabs[1]:
+    st.header(f"📆 Wochentags‑Quests: {weekday}")
+    week_tasks = tasks.get("Wochenplan", {}).get(weekday, [])
+    xp_w = sum(task_item(t["task"], t["xp"]) for t in week_tasks)
+
+# Abendroutine
+with tabs[2]:
     st.header("🌙 Abendroutine")
     xp_e = sum(task_item(t["task"], t["xp"]) for t in tasks.get("Abendroutine", []))
+
 # Nebenmissionen
-with tabs[2]:
+with tabs[3]:
     st.header("🕹 Nebenmissionen")
     xp_n = sum(task_item(t["task"], t["xp"], is_neben=True) for t in tasks.get("Nebenmissionen", []))
     if st.button("🔁 Nebenmissionen zurücksetzen"):
@@ -148,7 +157,7 @@ with tabs[2]:
         st.experimental_rerun()
 
 # ——— XP‑Übersicht & Speichern ———
-total_xp = xp_m + xp_e + xp_n
+total_xp = xp_m + xp_w + xp_e + xp_n
 st.sidebar.markdown(f"## Heutige XP: **{total_xp}**")
 if st.sidebar.button("💾 Speichern & Loggen"):
     # XP-Log aktualisieren
