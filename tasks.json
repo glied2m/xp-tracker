@@ -1,76 +1,230 @@
 {
   "Morgenroutine": [
-    {"task": "Lüften & Licht", "xp": 1},
-    {"task": "Bett machen", "xp": 2},
-    {"task": "Gesicht waschen / duschen", "xp": 1},
-    {"task": "Zähne putzen", "xp": 5},
-    {"task": "Aknemycin", "xp": 5},
-    {"task": "10 Min warten (Sonnencreme!)", "xp": 1},
-    {"task": "Sonnencreme auftragen", "xp": 5},
-    {"task": "Frühstück & Wasser", "xp": 5},
-    {"task": "Geschirr wegräumen & Küchentheke abwischen", "xp": 3},
-    {"task": "Anziehen", "xp": 2}
+    {
+      "task": "Lüften & Licht",
+      "xp": 1
+    },
+    {
+      "task": "Bett machen",
+      "xp": 2
+    },
+    {
+      "task": "Gesicht waschen / duschen",
+      "xp": 1
+    },
+    {
+      "task": "Zähne putzen",
+      "xp": 5
+    },
+    {
+      "task": "Aknemycin",
+      "xp": 5
+    },
+    {
+      "task": "10 Min warten (Sonnencreme!)",
+      "xp": 1
+    },
+    {
+      "task": "Sonnencreme auftragen",
+      "xp": 5
+    },
+    {
+      "task": "Frühstück & Wasser",
+      "xp": 5
+    },
+    {
+      "task": "Geschirr wegräumen & Küchentheke abwischen",
+      "xp": 3
+    },
+    {
+      "task": "Anziehen",
+      "xp": 2
+    }
   ],
   "Mittagsroutine": [
-    {"task": "Mittagessen & Wasser trinken", "xp": 5},
-    {"task": "Geschirr wegräumen & Küchentheke abwischen", "xp": 3},
-    {"task": "Schmutzwäsche in Korb legen", "xp": 1},
-    {"task": "Kurz durchlüften (Fenster 5 Min)", "xp": 1},
-    {"task": "Kurze Pause / Dehnübungen", "xp": 2}
+    {
+      "task": "Mittagessen & Wasser trinken",
+      "xp": 5
+    },
+    {
+      "task": "Geschirr wegräumen & Küchentheke abwischen",
+      "xp": 3
+    },
+    {
+      "task": "Schmutzwäsche in Korb legen",
+      "xp": 1
+    },
+    {
+      "task": "Kurz durchlüften (Fenster 5 Min)",
+      "xp": 1
+    },
+    {
+      "task": "Kurze Pause / Dehnübungen",
+      "xp": 2
+    }
   ],
   "Abendroutine": [
-    {"task": "Zähne putzen (abends)", "xp": 5},
-    {"task": "Minoxidil (abends)", "xp": 2},
-    {"task": "Wasserflasche auffüllen", "xp": 1},
-    {"task": "Abendessen & Geschirr wegräumen", "xp": 3},
-    {"task": "Küchentheke abwischen", "xp": 2},
-    {"task": "Handy laden", "xp": 1},
-    {"task": "Kleines Entspannen", "xp": 2}
+    {
+      "task": "Zähne putzen (abends)",
+      "xp": 5
+    },
+    {
+      "task": "Minoxidil (abends)",
+      "xp": 2
+    },
+    {
+      "task": "Wasserflasche auffüllen",
+      "xp": 1
+    },
+    {
+      "task": "Abendessen & Geschirr wegräumen",
+      "xp": 3
+    },
+    {
+      "task": "Küchentheke abwischen",
+      "xp": 2
+    },
+    {
+      "task": "Handy laden",
+      "xp": 1
+    },
+    {
+      "task": "Kleines Entspannen",
+      "xp": 2
+    },
+    {
+      "task": "Reflektieren & Morgen planen",
+      "xp": 2
+    }
   ],
   "Wochenplan": {
     "Montag": [
-      {"task": "Müll rausbringen", "xp": 5},
-      {"task": "Saugen", "xp": 5},
-      {"task": "Katzenklo kurz reinigen", "xp": 3},
-      {"task": "Einkaufsliste checken", "xp": 2}
+      {
+        "task": "Müll rausbringen",
+        "xp": 5
+      },
+      {
+        "task": "Saugen",
+        "xp": 5
+      },
+      {
+        "task": "Katzenklo kurz reinigen",
+        "xp": 3
+      },
+      {
+        "task": "Einkaufsliste checken",
+        "xp": 2
+      }
     ],
     "Dienstag": [
-      {"task": "Küche gründlich/Flächen abwischen", "xp": 5},
-      {"task": "Pfand wegbringen (wenn voll)", "xp": 5},
-      {"task": "Badoberflächen kurz säubern", "xp": 3}
+      {
+        "task": "Küche gründlich/Flächen abwischen",
+        "xp": 5
+      },
+      {
+        "task": "Pfand wegbringen (wenn voll)",
+        "xp": 5
+      },
+      {
+        "task": "Badoberflächen kurz säubern",
+        "xp": 3
+      }
     ],
     "Mittwoch": [
-      {"task": "Pflanzen gießen", "xp": 3},
-      {"task": "Einkaufen", "xp": 5},
-      {"task": "Papier/Altglas raus", "xp": 3}
+      {
+        "task": "Pflanzen gießen",
+        "xp": 3
+      },
+      {
+        "task": "Einkaufen",
+        "xp": 5
+      },
+      {
+        "task": "Papier/Altglas raus",
+        "xp": 3
+      }
     ],
     "Donnerstag": [
-      {"task": "Verwaltung/Termin/Behörden (wenn nötig)", "xp": 5},
-      {"task": "Katzenklo gründlich reinigen", "xp": 5}
+      {
+        "task": "Verwaltung/Termin/Behörden (wenn nötig)",
+        "xp": 5
+      },
+      {
+        "task": "Katzenklo gründlich reinigen",
+        "xp": 5
+      }
     ],
     "Freitag": [
-      {"task": "Wischen", "xp": 5},
-      {"task": "Badezimmer putzen", "xp": 5},
-      {"task": "Wäsche waschen", "xp": 5},
-      {"task": "Küche aufräumen (Geschirr, Flächen)", "xp": 5}
+      {
+        "task": "Wischen",
+        "xp": 5
+      },
+      {
+        "task": "Badezimmer putzen",
+        "xp": 5
+      },
+      {
+        "task": "Wäsche waschen",
+        "xp": 5
+      },
+      {
+        "task": "Küche aufräumen (Geschirr, Flächen)",
+        "xp": 5
+      }
     ],
     "Samstag": [
-      {"task": "Bett frisch beziehen", "xp": 5},
-      {"task": "Freizeit/Hobby", "xp": 3},
-      {"task": "Freunde/Familie anrufen", "xp": 2}
+      {
+        "task": "Bett frisch beziehen",
+        "xp": 5
+      },
+      {
+        "task": "Freizeit/Hobby",
+        "xp": 3
+      },
+      {
+        "task": "Freunde/Familie anrufen",
+        "xp": 2
+      }
     ],
     "Sonntag": [
-      {"task": "Wochenausblick & chillen", "xp": 2}
+      {
+        "task": "Wochenausblick & chillen",
+        "xp": 2
+      }
     ]
   },
   "Nebenmissionen": [
-    {"task": "Papierkram/Steuer (Monatsmission)", "xp": 15},
-    {"task": "Keller für eBay vorbereiten", "xp": 10},
-    {"task": "Bewerbung schreiben/versenden", "xp": 20},
-    {"task": "Lautsprecher auf eBay stellen", "xp": 10},
-    {"task": "Fitnessgeräte auf eBay stellen", "xp": 10},
-    {"task": "Antrag für Führerscheinfinanzierung vorbereiten", "xp": 15},
-    {"task": "Steuerunterlagen sammeln (Kontoauszüge etc.)", "xp": 10},
-    {"task": "Wichtige Dokumente digitalisieren", "xp": 10}
+    {
+      "task": "Papierkram/Steuer (Monatsmission)",
+      "xp": 15
+    },
+    {
+      "task": "Keller für eBay vorbereiten",
+      "xp": 10
+    },
+    {
+      "task": "Bewerbung schreiben/versenden",
+      "xp": 20
+    },
+    {
+      "task": "Lautsprecher auf eBay stellen",
+      "xp": 10
+    },
+    {
+      "task": "Fitnessgeräte auf eBay stellen",
+      "xp": 10
+    },
+    {
+      "task": "Antrag für Führerscheinfinanzierung vorbereiten",
+      "xp": 15
+    },
+    {
+      "task": "Steuerunterlagen sammeln (Kontoauszüge etc.)",
+      "xp": 10
+    },
+    {
+      "task": "Wichtige Dokumente digitalisieren",
+      "xp": 10
+    }
   ]
 }
