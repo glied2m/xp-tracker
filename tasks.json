@@ -45,7 +45,6 @@
     "Samstag": [
       {"task": "Bett frisch beziehen", "xp": 5},
       {"task": "Freizeit/Hobby", "xp": 3},
-      {"task": "Backup machen", "xp": 3},
       {"task": "Freunde/Familie anrufen", "xp": 2}
     ],
     "Sonntag": [
