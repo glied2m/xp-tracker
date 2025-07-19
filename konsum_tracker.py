@@ -34,10 +34,8 @@ tracker = load_tracker()
 
 # --- Tag Auswahl ---
 sel_date = st.date_input(
-    "Tag wählen:",
-    value=today,
-    min_value=start_month,
-    max_value=today
+    "Tag wählen:", value=today,
+    min_value=start_month, max_value=today
 )
 sel_str = sel_date.isoformat()
 
@@ -57,15 +55,13 @@ col1, col2, col3 = st.columns(3)
 with col1:
     st.subheader("Denicit‑Tabletten")
     tracker[sel_str]["denicit"] = st.number_input(
-        "Tabletten heute",
-        min_value=0, max_value=20, step=1,
+        "Tabletten heute", min_value=0, max_value=20, step=1,
         value=tracker[sel_str]["denicit"]
     )
 
     st.subheader("Zigaretten")
     tracker[sel_str]["cigs"] = st.number_input(
-        "Zigaretten heute",
-        min_value=0, max_value=60, step=1,
+        "Zigaretten heute", min_value=0, max_value=60, step=1,
         value=tracker[sel_str]["cigs"]
     )
 
@@ -73,8 +69,7 @@ with col2:
     st.subheader("Weed‑Konsum nach Form (g)")
     for form in FORMS:
         tracker[sel_str]["weed"][form] = st.number_input(
-            f"{form} (g)",
-            min_value=0.0, max_value=10.0, step=0.05,
+            f"{form} (g)", min_value=0.0, max_value=10.0, step=0.05,
             value=float(tracker[sel_str]["weed"].get(form, 0.0)),
             key=f"weed_{form}"
         )
@@ -82,15 +77,13 @@ with col2:
 with col3:
     st.subheader("☕ Kaffee/Tee (Becher)")
     tracker[sel_str]["coffee"] = st.number_input(
-        "Becher heute",
-        min_value=0, max_value=20, step=1,
+        "Becher heute", min_value=0, max_value=20, step=1,
         value=tracker[sel_str].get("coffee", 0)
     )
 
     st.subheader("⚡ Energydrinks (Dosen)")
     tracker[sel_str]["energy"] = st.number_input(
-        "Dosen heute",
-        min_value=0, max_value=10, step=1,
+        "Dosen heute", min_value=0, max_value=10, step=1,
         value=tracker[sel_str].get("energy", 0)
     )
 
@@ -124,29 +117,32 @@ df = pd.DataFrame(hist, columns=cols).set_index("Tag")
 st.subheader("📅 Monatsübersicht (Tabelle)")
 st.dataframe(df, use_container_width=True)
 
-# --- Chart-Fix: sicherstellen, dass alle Spalten numeric sind ---
-df["Denicit"] = pd.to_numeric(df["Denicit"], errors="coerce").fillna(0).astype(int)
-df["Zigaretten"] = pd.to_numeric(df["Zigaretten"], errors="coerce").fillna(0).astype(int)
-df["Kaffee/Tee"] = pd.to_numeric(df["Kaffee/Tee"], errors="coerce").fillna(0).astype(int)
-df["Energydrink"] = pd.to_numeric(df["Energydrink"], errors="coerce").fillna(0).astype(int)
-for form in FORMS:
-    col_name = f"Weed: {form}"
-    df[col_name] = pd.to_numeric(df[col_name], errors="coerce").fillna(0).astype(float)
+# --- Chart-Daten säubern & Spalten-Namen korrigieren ---
+# Erstelle eine Kopie für Charts, ersetze ":" und Leerzeichen
+df_chart = df.copy()
+df_chart.columns = [
+    col.replace(":", "").replace(" ", "_") for col in df_chart.columns
+]
+
+# Cast aller Spalten in numeric
+for c in df_chart.columns:
+    df_chart[c] = pd.to_numeric(df_chart[c], errors="coerce").fillna(0)
 
 # --- Monatsstatistik (Charts) ---
 st.subheader("📈 Monatsstatistik")
 chart_cols = st.columns(5 + len(FORMS))
 chart_cols[0].markdown("**Denicit**")
-chart_cols[0].bar_chart(df["Denicit"])
+chart_cols[0].bar_chart(df_chart["Denicit"])
 chart_cols[1].markdown("**Zigaretten**")
-chart_cols[1].bar_chart(df["Zigaretten"])
+chart_cols[1].bar_chart(df_chart["Zigaretten"])
 chart_cols[2].markdown("**Kaffee/Tee**")
-chart_cols[2].bar_chart(df["Kaffee/Tee"])
+chart_cols[2].bar_chart(df_chart["Kaffee/Tee"])
 chart_cols[3].markdown("**Energydrink**")
-chart_cols[3].bar_chart(df["Energydrink"])
+chart_cols[3].bar_chart(df_chart["Energydrink"])
 for idx, form in enumerate(FORMS):
     col_idx = 4 + idx
+    key = f"Weed{form}"
     chart_cols[col_idx].markdown(f"**Weed ({form})**")
-    chart_cols[col_idx].bar_chart(df[f"Weed: {form}"])
+    chart_cols[col_idx].bar_chart(df_chart[key])
 
 st.caption("Alle Daten lokal in 'consumption_log.json' – Gramm pro Form & Koffein-Tracker.")
