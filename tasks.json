@@ -1,10 +1,9 @@
 {
   "Morgenroutine": [
     {"task": "Lüften & Licht", "xp": 1},
-    {"task": "Toilette & Hände waschen", "xp": 1},
     {"task": "Gesicht waschen / duschen", "xp": 1},
-    {"task": "Zähne putzen (morgens)", "xp": 5},
-    {"task": "Aknemycin (morgens)", "xp": 5},
+    {"task": "Zähne putzen ", "xp": 5},
+    {"task": "Aknemycin ", "xp": 5},
     {"task": "10 Min warten (Sonnencreme!)", "xp": 1},
     {"task": "Sonnencreme auftragen", "xp": 5},
     {"task": "Frühstück & Wasser", "xp": 5},
@@ -51,17 +50,16 @@
     ],
     "Sonntag": [
       {"task": "Wochenausblick & chillen", "xp": 2},
-      {"task": "Technik-Check", "xp": 3},
-      {"task": "Verträge/SIM-Karten prüfen", "xp": 2}
     ]
   },
   "Nebenmissionen": [
     {"task": "Papierkram/Steuer (Monatsmission)", "xp": 15},
-    {"task": "Filter reinigen (Monatsmission)", "xp": 5},
-    {"task": "Backofen fotografieren", "xp": 10},
-    {"task": "eBay-Account reparieren", "xp": 10},
     {"task": "Keller für eBay vorbereiten", "xp": 10},
-    {"task": "SIM-Karten checken", "xp": 5},
-    {"task": "Bewerbung schreiben/versenden", "xp": 20}
+    {"task": "Bewerbung schreiben/versenden", "xp": 20}  
+    {"task": "Lautsprecher auf eBay stellen", "xp": 10},
+    {"task": "Fitnessgeräte auf eBay stellen", "xp": 10},
+    {"task": "Antrag für Führerscheinfinanzierung vorbereiten", "xp": 15},
+    {"task": "Steuerunterlagen sammeln (Kontoauszüge etc.)", "xp": 10},
+    {"task": "Wichtige Dokumente digitalisieren", "xp": 10}
   ]
 }
