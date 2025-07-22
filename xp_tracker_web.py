@@ -5,7 +5,7 @@ import datetime
 import os
 
 # --- Datei-Pfade ---
-TASKS_FILE = "xp_tasks.json"
+TASKS_FILE = "tasks.json"
 XP_LOG_JSON = "xp_log.json"
 MISSIONS_DONE_FILE = "missions_done.json"
 STATUS_FILE = "today_status.json"
@@ -34,12 +34,10 @@ def load_xp_log():
     return df.dropna(subset=["Datum"])
 
 def save_xp_log(df):
-    df = df.copy()
-    df["Datum"] = df["Datum"].astype(str)  # Fix: Convert datetime to string for JSON
+    df_copy = df.copy()
+    df_copy["Datum"] = df_copy["Datum"].dt.strftime("%Y-%m-%d")
     with open(XP_LOG_JSON, "w", encoding="utf-8") as f:
-        json.dump(df.to_dict(orient="records"), f, ensure_ascii=False, indent=2)
-
-
+        json.dump(df_copy.to_dict(orient="records"), f, ensure_ascii=False, indent=2)
 
 def load_missions_done():
     if not os.path.exists(MISSIONS_DONE_FILE): return set()
@@ -86,18 +84,15 @@ tasks = load_tasks()
 logdf = load_xp_log()
 missions_done = load_missions_done()
 
-# Sicherstellen, dass tasks alle Keys hat
 for key in ["Morgenroutine", "Abendroutine", "Nebenmissionen", "Wochenplan"]:
     if key not in tasks:
         tasks[key] = [] if key != "Wochenplan" else {}
 
-# --- Datumslogik ---
 tage_de = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
 
 selected_date = st.date_input("Für welchen Tag Aufgaben & XP bearbeiten?", value=datetime.date.today(), min_value=datetime.date.today() - datetime.timedelta(days=30), max_value=datetime.date.today())
 weekday_de = tage_de[selected_date.weekday()]
 
-# --- Session State für Checkboxen ---
 if "daily_state" not in st.session_state:
     st.session_state.daily_state = {}
 
@@ -135,7 +130,6 @@ def calc_xp(date):
                 xp += t['xp']
     return xp
 
-# --- Layout ---
 col1, col2, col3, col4, col5 = st.columns([1.1,1.1,1.1,1.1,1.5], gap="small")
 with col1:
     show_tasks("Morgenroutine", tasks.get("Morgenroutine", []))
@@ -177,7 +171,6 @@ with col5:
     chart = week["XP"].reindex(pd.date_range(datetime.date.today() - datetime.timedelta(days=6), datetime.date.today()), fill_value=0)
     st.bar_chart(chart, use_container_width=True)
 
-# --- Reset ---
 if st.button("🔁 Erledigte Nebenmissionen zurücksetzen"):
     missions_done.clear()
     save_missions_done(missions_done)
