@@ -5,7 +5,7 @@ import datetime
 import os
 
 # --- Datei-Pfade ---
-TASKS_FILE = "tasks.json"
+TASKS_FILE = "xp_tasks.json"
 XP_LOG_JSON = "xp_log.json"
 MISSIONS_DONE_FILE = "missions_done.json"
 STATUS_FILE = "today_status.json"
