@@ -34,8 +34,12 @@ def load_xp_log():
     return df.dropna(subset=["Datum"])
 
 def save_xp_log(df):
+    df = df.copy()
+    df["Datum"] = df["Datum"].astype(str)  # Fix: Convert datetime to string for JSON
     with open(XP_LOG_JSON, "w", encoding="utf-8") as f:
-        json.dump(df.to_dict(orient="records"), f, ensure_ascii=False)
+        json.dump(df.to_dict(orient="records"), f, ensure_ascii=False, indent=2)
+
+
 
 def load_missions_done():
     if not os.path.exists(MISSIONS_DONE_FILE): return set()
