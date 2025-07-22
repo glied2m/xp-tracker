@@ -72,7 +72,7 @@ def save_daily_log(date, checked_tasks):
         json.dump(all_logs, f, ensure_ascii=False, indent=2)
 
 # --- Streamlit Setup ---
-st.set_page_config("XP Tracker", page_icon="🧠", layout="wide")
+st.set_page_config("XP Tracker", page_icon="🧐", layout="wide")
 
 st.title(" XP-Tracker ")
 st.caption("Web-App für Felix | Automatisch einmalige Nebenmissionen ausblenden")
