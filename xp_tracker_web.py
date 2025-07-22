@@ -1,21 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-XP‑Tracker
+XP‑Tracker Web Edition mit SQLite-Backend
 
 Speichern als xp_tracker_web.py und starten mit:
     streamlit run xp_tracker_web.py
 """
-
 import streamlit as st
-import json, os
-import pandas as pd
+import sqlite3
+import os
 import datetime
+import pandas as pd
 
-# —— Konfiguration ——
+# —— Konstanten ——
+DB_FILE = "xp_tracker.db"
 TASKS_FILE = "tasks.json"
-XP_LOG = "xp_log.csv"
-MISSIONS_DONE_FILE = "missions_done.json"
 IMPORTANT_TASKS = {
     "Zähne putzen (morgens)",
     "Lisdexamphetamin nehmen",
@@ -27,130 +26,136 @@ REWARDS = [
     {"name": "💨 Bong erlaubt", "cost": 60},
 ]
 
-# —— Hilfsfunktionen ——
+# —— DB-Hilfsfunktionen ——
+def init_db():
+    with sqlite3.connect(DB_FILE) as conn:
+        c = conn.cursor()
+        c.execute("""
+        CREATE TABLE IF NOT EXISTS tasks_done (
+            date TEXT,
+            task TEXT,
+            xp INTEGER,
+            PRIMARY KEY(date, task)
+        )""")
+        c.execute("""
+        CREATE TABLE IF NOT EXISTS xp_log (
+            date TEXT PRIMARY KEY,
+            xp INTEGER
+        )""")
+        c.execute("""
+        CREATE TABLE IF NOT EXISTS reminders (
+            date TEXT,
+            task TEXT,
+            remind_at TEXT,
+            PRIMARY KEY(date, task)
+        )""")
+        conn.commit()
+
+def mark_task_done(date: str, task: str, xp: int):
+    with sqlite3.connect(DB_FILE) as conn:
+        conn.execute(
+            "REPLACE INTO tasks_done(date, task, xp) VALUES (?,?,?)", (date, task, xp)
+        )
+        conn.commit()
+
+def get_tasks_done(date: str):
+    with sqlite3.connect(DB_FILE) as conn:
+        rows = conn.execute(
+            "SELECT task, xp FROM tasks_done WHERE date = ?", (date,)
+        ).fetchall()
+    return {task: xp for task, xp in rows}
+
+def log_daily_xp(date: str, xp: int):
+    with sqlite3.connect(DB_FILE) as conn:
+        conn.execute(
+            "REPLACE INTO xp_log(date, xp) VALUES (?,?)", (date, xp)
+        )
+        conn.commit()
+
+def get_week_xp(end_date: str):
+    sd = datetime.datetime.strptime(end_date, "%Y-%m-%d").date()
+    start = sd - datetime.timedelta(days=6)
+    with sqlite3.connect(DB_FILE) as conn:
+        rows = conn.execute(
+            "SELECT date, xp FROM xp_log WHERE date BETWEEN ? AND ? ORDER BY date", 
+            (start.isoformat(), sd.isoformat())
+        ).fetchall()
+    data = {d.isoformat():0 for d in [start + datetime.timedelta(days=i) for i in range(7)]}
+    for date_str, xp in rows:
+        data[date_str] = xp
+    return data
+
+# —— Tasks laden ——
 def load_tasks():
-    with open(TASKS_FILE, encoding="utf-8") as f:
+    import json
+    with open(TASKS_FILE, encoding='utf-8') as f:
         return json.load(f)
 
-def load_xp_log():
-    if os.path.exists(XP_LOG):
-        df = pd.read_csv(XP_LOG, sep=";", parse_dates=["Datum"], dayfirst=True)
-        df["Datum"] = pd.to_datetime(df["Datum"], errors="coerce").dt.normalize()
-        df = df.dropna(subset=["Datum"])
-        return df
-    return pd.DataFrame(columns=["Datum","XP"])
-
-def save_xp_log(df):
-    df.to_csv(XP_LOG, sep=";", index=False)
-
-def load_missions_done():
-    if os.path.exists(MISSIONS_DONE_FILE):
-        return set(json.load(open(MISSIONS_DONE_FILE, encoding="utf-8")))
-    return set()
-
-def save_missions_done(s):
-    json.dump(list(s), open(MISSIONS_DONE_FILE, "w", encoding="utf-8"), ensure_ascii=False)
-
-# —— Streamlit UI Setup ——
+# —— Streamlit App ———
+init_db()
 st.set_page_config("XP Tracker 🧠", layout="wide", page_icon="🧠")
+
 st.markdown("""
-    <style>
-      .important-label { color: #ff4b4b; font-weight: bold; margin-bottom: -8px; display: block; }
-      .block-container { padding: 1rem; background: #1a1b1e; }
-      h1,h2,h3,h4 { color: #e6e6e6; }
-    </style>
+<style>
+  .important-label { color: #ff4b4b; font-weight: bold; display: block; margin-bottom: -4px; }
+  .st-app { background: #1a1b1e; }
+</style>
 """, unsafe_allow_html=True)
 
-st.title("XP-Tracker 🚀 Web Edition")
-
-# —— Daten laden ——
-tasks = load_tasks()
-logdf = load_xp_log()
-missions_done = load_missions_done()
-
-# —— Datumsauswahl ——
+st.title("XP‑Tracker 🚀 mit SQLite Backend")
+# Seitenleiste für Datum
 today = datetime.date.today()
-selected_date = st.sidebar.date_input(
-    "Für welchen Tag?", today,
-    min_value=today - datetime.timedelta(days=30),
-    max_value=today
-)
+selected_date = st.sidebar.date_input("Für welchen Tag?", today,
+                                    min_value=today-datetime.timedelta(days=30),
+                                    max_value=today)
+date_key = selected_date.isoformat()
+
+# Lade Tasks & erledigte Tasks aus DB
+tasks = load_tasks()
+done = get_tasks_done(date_key)
+
+# Sitzungshalter initialisieren
+if 'done' not in st.session_state:
+    st.session_state.done = set(done.keys())
+
+# Task-Rendering & DB-Schreibungen
+def render_section(title, items, is_neben=False):
+    st.header(title)
+    for t in items:
+        name, xp = t['task'], t['xp']
+        checked = name in st.session_state.done
+        label = f"{name} (+{xp} XP)"
+        if name in IMPORTANT_TASKS:
+            st.markdown(f"<span class='important-label'>❗ {label}</span>", unsafe_allow_html=True)
+            cb = st.checkbox("", key=f"cb_{name}", value=checked)
+        else:
+            cb = st.checkbox(label, key=f"cb_{name}", value=checked)
+        if cb and not checked:
+            st.session_state.done.add(name)
+            mark_task_done(date_key, name, xp)
+        if not cb and checked:
+            st.session_state.done.remove(name)
+            # Optionally delete from DB here
+
+# Abschnitte
+render_section("🌅 Morgenroutine", tasks.get("Morgenroutine", []))
 weekday = ["Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag","Sonntag"][selected_date.weekday()]
+render_section(f"📆 Wochentags-Quests: {weekday}", tasks.get("Wochenplan", {}).get(weekday, []))
+render_section("🌙 Abendroutine", tasks.get("Abendroutine", []))
+render_section("🕹 Nebenmissionen", tasks.get("Nebenmissionen", []), is_neben=True)
 
-# State keys
-state_key = f"done_{selected_date.isoformat()}"
-if state_key not in st.session_state:
-    st.session_state[state_key] = set()
-rem_key = f"rem_{selected_date.isoformat()}"
-if rem_key not in st.session_state:
-    st.session_state[rem_key] = {}
+# XP summieren & speichern
+xp_today = sum(get_tasks_done(date_key).values())
+st.sidebar.markdown(f"## Heutige XP: **{xp_today}**")
+if st.sidebar.button("XP loggen"):
+    log_daily_xp(date_key, xp_today)
+    st.sidebar.success("Tages-XP gespeichert!")
 
-# —— Task-Renderer ——
-def task_item(name, xp, is_neben=False):
-    if is_neben and name in missions_done:
-        return 0
-    checked = name in st.session_state[state_key]
-    if name in IMPORTANT_TASKS:
-        st.markdown(f"<span class='important-label'>❗ {name} (+{xp} XP)</span>", unsafe_allow_html=True)
-        cb = st.checkbox("", key=f"cb_{name}_{selected_date}", value=checked)
-    else:
-        cb = st.checkbox(f"{name} (+{xp} XP)", key=f"cb_{name}_{selected_date}", value=checked)
-    if cb and not checked:
-        st.session_state[state_key].add(name)
-    if not cb and checked:
-        st.session_state[state_key].remove(name)
-    if name in IMPORTANT_TASKS and name not in st.session_state[state_key]:
-        prev = st.session_state[rem_key].get(name, datetime.time(hour=8))
-        t = st.time_input(f"⏰ Erinnerung für '{name}'", value=prev, key=f"tm_{name}_{selected_date}")
-        st.session_state[rem_key][name] = t
-        if datetime.datetime.now().time() >= t:
-            st.warning(f"🕒 Jetzt: '{name}' erledigen!", icon="⚠️")
-    return xp if cb else 0
-
-# —— Tabs für Abschnitte ——
-tabs = st.tabs(["Morgenroutine","Wochentags-Quests","Abendroutine","Nebenmissionen"])
-with tabs[0]:
-    st.header("🌅 Morgenroutine")
-    xp_m = sum(task_item(t["task"], t["xp"]) for t in tasks.get("Morgenroutine", []))
-with tabs[1]:
-    st.header(f"📆 Wochentags-Quests: {weekday}")
-    week_tasks = tasks.get("Wochenplan", {}).get(weekday, [])
-    xp_w = sum(task_item(t["task"], t["xp"]) for t in week_tasks)
-with tabs[2]:
-    st.header("🌙 Abendroutine")
-    xp_e = sum(task_item(t["task"], t["xp"]) for t in tasks.get("Abendroutine", []))
-with tabs[3]:
-    st.header("🕹 Nebenmissionen")
-    xp_n = sum(task_item(t["task"], t["xp"], is_neben=True) for t in tasks.get("Nebenmissionen", []))
-    if st.button("🔁 Reset Nebenmissionen"):
-        missions_done.clear()
-        save_missions_done(missions_done)
-        st.experimental_rerun()
-
-# —— Gesamt XP & Speichern ——
-total_xp = xp_m + xp_w + xp_e + xp_n
-st.sidebar.markdown(f"## Heutige XP: **{total_xp}**")
-if st.sidebar.button("💾 Speichern & Loggen"):
-    new_df = logdf[logdf["Datum"] != pd.to_datetime(selected_date)] if not logdf.empty else logdf
-    new_df = pd.concat([new_df, pd.DataFrame([{"Datum": selected_date, "XP": total_xp}])])
-    save_xp_log(new_df)
-    for t in tasks.get("Nebenmissionen", []):
-        if t["task"] in st.session_state[state_key]:
-            missions_done.add(t["task"])
-    save_missions_done(missions_done)
-    st.sidebar.success("✓ Gespeichert!")
-
-# —— Wochen-Chart ——
+# Wochen-Chart
 st.header("📊 XP-Wochenübersicht")
-# Daten für Resampling vorbereiten
-df_logs = load_xp_log()
-# Ensure 'Datum' is datetime and set as index
-df_logs["Datum"] = pd.to_datetime(df_logs["Datum"], errors="coerce").dt.normalize()
-df_logs = df_logs.dropna(subset=["Datum"])
-# Create full 7-day date index
-idx = pd.date_range(today - datetime.timedelta(days=6), today)
-# Aggregate xp per day
-daily = df_logs.groupby("Datum")["XP"].sum()
-# Reindex to include missing days
-all_log = daily.reindex(idx, fill_value=0)
-st.bar_chart(all_log, use_container_width=True)
+week_data = get_week_xp(date_key)
+chart_df = pd.DataFrame({'XP': list(week_data.values())},
+                        index=pd.to_datetime(list(week_data.keys())))
+st.bar_chart(chart_df, use_container_width=True)
+
+st.caption("Datenbank: xp_tracker.db – Tasks und XP sicher gespeichert.")
