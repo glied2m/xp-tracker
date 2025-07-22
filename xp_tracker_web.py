@@ -6,7 +6,7 @@ import os
 
 # --- Datei-Pfade ---
 TASKS_FILE = "tasks.json"
-XP_LOG = "xp_log.csv"
+XP_LOG_JSON = "xp_log.json"
 MISSIONS_DONE_FILE = "missions_done.json"
 STATUS_FILE = "today_status.json"
 
@@ -24,15 +24,17 @@ def load_tasks():
         return json.load(f)
 
 def load_xp_log():
-    try:
-        df = pd.read_csv(XP_LOG, sep=";", parse_dates=["Datum"])
-        df["Datum"] = pd.to_datetime(df["Datum"], errors="coerce").dt.normalize()
-        return df.dropna(subset=["Datum"])
-    except Exception:
+    if not os.path.exists(XP_LOG_JSON):
         return pd.DataFrame(columns=["Datum", "XP"])
+    with open(XP_LOG_JSON, encoding="utf-8") as f:
+        data = json.load(f)
+    df = pd.DataFrame(data)
+    df["Datum"] = pd.to_datetime(df["Datum"], errors="coerce").dt.normalize()
+    return df.dropna(subset=["Datum"])
 
 def save_xp_log(df):
-    df.to_csv(XP_LOG, sep=";", index=False)
+    with open(XP_LOG_JSON, "w", encoding="utf-8") as f:
+        json.dump(df.to_dict(orient="records"), f, ensure_ascii=False)
 
 def load_missions_done():
     if not os.path.exists(MISSIONS_DONE_FILE): return set()
