@@ -28,10 +28,18 @@ def load_xp_log():
     if not os.path.exists(XP_LOG_JSON):
         return pd.DataFrame(columns=["Datum", "XP"])
     with open(XP_LOG_JSON, encoding="utf-8") as f:
-        data = json.load(f)
-    df = pd.DataFrame(data)
-    df["Datum"] = pd.to_datetime(df["Datum"], errors="coerce").dt.normalize()
-    return df.dropna(subset=["Datum"])
+        try:
+            data = json.load(f)
+            if not data:
+                return pd.DataFrame(columns=["Datum", "XP"])
+            df = pd.DataFrame(data)
+            if "Datum" not in df.columns or "XP" not in df.columns:
+                return pd.DataFrame(columns=["Datum", "XP"])
+            df["Datum"] = pd.to_datetime(df["Datum"], errors="coerce").dt.normalize()
+            return df.dropna(subset=["Datum"])
+        except json.JSONDecodeError:
+            return pd.DataFrame(columns=["Datum", "XP"])
+
 
 def save_xp_log(df):
     df_copy = df.copy()
