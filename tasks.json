@@ -1,1 +1,48 @@
-{}
+{
+  "Morgenroutine": [
+    {"task": "Aufstehen & Licht an", "xp": 2},
+    {"task": "Zähne putzen (morgens)", "xp": 2},
+    {"task": "Aknemycin auftragen", "xp": 2},
+    {"task": "Sonnencreme auftragen", "xp": 2},
+    {"task": "Frühstück & Wasser trinken", "xp": 3},
+    {"task": "Anziehen & Wohnung ordentlich verlassen", "xp": 2}
+  ],
+  "Abendroutine": [
+    {"task": "Zähne putzen (abends)", "xp": 2},
+    {"task": "Minoxidil & Aknemycin (abends)", "xp": 2},
+    {"task": "Handy laden", "xp": 1},
+    {"task": "Morgen vorbereiten / entspannen", "xp": 2}
+  ],
+  "Wochenplan": {
+    "Montag": [
+      {"task": "Katzenregale prüfen", "xp": 5}
+    ],
+    "Dienstag": [
+      {"task": "Wäsche waschen", "xp": 5}
+    ],
+    "Mittwoch": [
+      {"task": "Keller entrümpeln", "xp": 5}
+    ],
+    "Donnerstag": [
+      {"task": "Steuerunterlagen sortieren", "xp": 5}
+    ],
+    "Freitag": [
+      {"task": "Backofen auf eBay stellen", "xp": 5}
+    ],
+    "Samstag": [
+      {"task": "Bewerbung schreiben", "xp": 10}
+    ],
+    "Sonntag": [
+      {"task": "Planung nächste Woche", "xp": 5}
+    ]
+  },
+  "Nebenmissionen": [
+    {"task": "Papierkram/Steuer (Monatsmission)", "xp": 15},
+    {"task": "Filter reinigen (Monatsmission)", "xp": 5},
+    {"task": "Backofen fotografieren", "xp": 10},
+    {"task": "eBay-Account reparieren", "xp": 10},
+    {"task": "Keller für eBay vorbereiten", "xp": 10},
+    {"task": "SIM-Karten checken", "xp": 5},
+    {"task": "Bewerbung schreiben/versenden", "xp": 20}
+  ]
+}
