@@ -72,7 +72,7 @@ def save_daily_log(date, checked_tasks):
         json.dump(all_logs, f, ensure_ascii=False, indent=2)
 
 # --- Streamlit Setup ---
-st.set_page_config("XP Tracker", page_icon="🧐", layout="wide")
+st.set_page_config("XP Tracker", page_icon="🧠", layout="wide")
 
 st.title(" XP-Tracker ")
 st.caption("Web-App für Felix | Automatisch einmalige Nebenmissionen ausblenden")
@@ -81,6 +81,11 @@ st.caption("Web-App für Felix | Automatisch einmalige Nebenmissionen ausblenden
 tasks = load_tasks()
 logdf = load_xp_log()
 missions_done = load_missions_done()
+
+# Sicherstellen, dass tasks alle Keys hat
+for key in ["Morgenroutine", "Abendroutine", "Nebenmissionen", "Wochenplan"]:
+    if key not in tasks:
+        tasks[key] = [] if key != "Wochenplan" else {}
 
 # --- Datumslogik ---
 tage_de = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
