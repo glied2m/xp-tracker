@@ -172,14 +172,27 @@ def calc_xp(date):
 
 # --- Layout mit Aufgaben ---
 col1, col2, col3, col4, col5 = st.columns([1,1,1,1,1.5])
-with col1:
-    show_tasks("Morgenroutine", tasks.get("Morgenroutine", []))
-with col2:
-    show_tasks(f"Wochenplan {weekday_de}", tasks.get("Wochenplan", {}).get(weekday_de, []))
-with col3:
-    show_tasks("Abendroutine", tasks.get("Abendroutine", []))
-with col4:
-    show_tasks("Nebenmissionen", tasks.get("Nebenmissionen", []), is_neben=True)
+
+from itertools import cycle
+cols = cycle(st.columns(4))  # max. 4 Spalten nebeneinander
+
+for section, items in tasks.items():
+    # Sonderfall Wochenplan
+    if section == "Wochenplan":
+        day_items = items.get(weekday_de, [])
+        if day_items:
+            col = next(cols)
+            with col:
+                show_tasks(f"Wochenplan {weekday_de}", day_items)
+        continue
+
+    # Nebenmissionen speziell behandeln
+    is_neben = section == "Nebenmissionen"
+    if isinstance(items, list) and items:
+        col = next(cols)
+        with col:
+            show_tasks(section, items, is_neben=is_neben)
+
 with col5:
     xp_today = calc_xp(selected_date)
     st.markdown(f"**XP heute:** {xp_today}")
