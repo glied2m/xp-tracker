@@ -12,5 +12,21 @@
       "Nebenmissionen_2_2025-07-26",
       "Nebenmissionen_6_2025-07-26"
     ]
+  },
+  {
+    "date": "2025-07-25",
+    "tasks": [
+      "Abendroutine_0_2025-07-25",
+      "Abendroutine_1_2025-07-25",
+      "Abendroutine_2_2025-07-25",
+      "Abendroutine_3_2025-07-25",
+      "Morgenroutine_0_2025-07-25",
+      "Morgenroutine_1_2025-07-25",
+      "Morgenroutine_2_2025-07-25",
+      "Morgenroutine_3_2025-07-25",
+      "Morgenroutine_4_2025-07-25",
+      "Morgenroutine_5_2025-07-25",
+      "Wochenplan Freitag_0_2025-07-25"
+    ]
   }
 ]
