@@ -3,6 +3,7 @@ import json
 import pandas as pd
 import datetime
 import os
+from github import Github
 
 
 # --- Datei-Pfade ---
