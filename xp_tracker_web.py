@@ -3,6 +3,7 @@ import json
 import pandas as pd
 import datetime
 import os
+from github import Github
 
 # --- Datei-Pfade ---
 TASKS_FILE = "xp_tasks.json"
@@ -10,6 +11,10 @@ XP_LOG_JSON = "xp_log.json"
 MISSIONS_DONE_FILE = "missions_done.json"
 STATUS_FILE = "today_status.json"
 DAILY_LOG_FILE = "daily_log.json"
+
+# --- GitHub Upload-Konfiguration ---
+GITHUB_TOKEN = st.secrets["github_token"]  # In Streamlit Secrets speichern
+GITHUB_REPO = "glied2m/xp-tracker"
 
 # --- Belohnungen ---
 REWARDS = [
@@ -44,12 +49,24 @@ def load_xp_log():
         except json.JSONDecodeError:
             return pd.DataFrame(columns=["Datum", "XP"])
 
+def save_file_and_upload(file_path):
+    g = Github(GITHUB_TOKEN)
+    repo = g.get_repo(GITHUB_REPO)
+    with open(file_path, "r", encoding="utf-8") as f:
+        content = f.read()
+    try:
+        contents = repo.get_contents(file_path)
+        repo.update_file(contents.path, f"Update {file_path}", content, contents.sha)
+    except:
+        repo.create_file(file_path, f"Create {file_path}", content)
+
 def save_xp_log(df):
     try:
         df = df[["Datum", "XP"]].copy()
         df["Datum"] = df["Datum"].astype(str)
         with open(XP_LOG_JSON, "w", encoding="utf-8") as f:
             json.dump(df.to_dict(orient="records"), f, ensure_ascii=False, indent=2)
+        save_file_and_upload(XP_LOG_JSON)
     except Exception as e:
         st.error(f"Fehler beim Speichern der XP: {e}")
 
@@ -64,6 +81,7 @@ def load_missions_done():
 def save_missions_done(done):
     with open(MISSIONS_DONE_FILE, "w", encoding="utf-8") as f:
         json.dump(list(done), f, ensure_ascii=False)
+    save_file_and_upload(MISSIONS_DONE_FILE)
 
 def save_status_json(date, xp):
     status = {
@@ -72,6 +90,7 @@ def save_status_json(date, xp):
     }
     with open(STATUS_FILE, "w", encoding="utf-8") as f:
         json.dump(status, f, ensure_ascii=False, indent=2)
+    save_file_and_upload(STATUS_FILE)
 
 def save_daily_log(date, checked_tasks):
     log_entry = {
@@ -89,6 +108,7 @@ def save_daily_log(date, checked_tasks):
     all_logs.append(log_entry)
     with open(DAILY_LOG_FILE, "w", encoding="utf-8") as f:
         json.dump(all_logs, f, ensure_ascii=False, indent=2)
+    save_file_and_upload(DAILY_LOG_FILE)
 
 # --- Start der App ---
 st.set_page_config("XP Tracker", page_icon="🧠", layout="wide")
