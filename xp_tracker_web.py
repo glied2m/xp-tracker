@@ -193,7 +193,11 @@ with col5:
 # --- Wochenchart ---
 all_log = pd.concat([logdf, pd.DataFrame([{"Datum": selected_date, "XP": xp_today}])], ignore_index=True)
 all_log["Datum"] = pd.to_datetime(all_log["Datum"], errors="coerce").dt.normalize()
-week = all_log[all_log["Datum"] >= (pd.to_datetime(datetime.date.today() - datetime.timedelta(days=6)))].set_index("Datum").sort_index()
+week = all_log[
+    all_log["Datum"] >= (datetime.date.today() - datetime.timedelta(days=6))
+].set_index("Datum").sort_index()
+
+week = week.groupby(week.index).sum()  # Duplikate zusammenfassen
 date_range = pd.date_range(datetime.date.today() - datetime.timedelta(days=6), datetime.date.today())
 chart = week["XP"].reindex(date_range, fill_value=0)
 st.bar_chart(chart, use_container_width=True)
