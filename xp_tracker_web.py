@@ -122,7 +122,7 @@ missions_done = load_missions_done()
 
 tage_de = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
 selected_date = st.date_input("Für welchen Tag Aufgaben & XP bearbeiten?", value=datetime.date.today())
-weekday_de = tage_de[selected_date.weekday()]
+day_de = tage_de[selected_date.day()]
 key_day = f"done_{selected_date.isoformat()}"
 
 if "daily_state" not in st.session_state:
@@ -150,7 +150,7 @@ def calc_xp(date):
     keys = st.session_state.daily_state.get(f"done_{date.isoformat()}", set())
     for section, items, is_neben in [
         ("Morgenroutine", tasks.get("Morgenroutine", []), False),
-        (f"Wochenplan {weekday_de}", tasks.get("Wochenplan", {}).get(weekday_de, []), False),
+        (f"Wochenplan {day_de}", tasks.get("Wochenplan", {}).get(day_de, []), False),
         ("Abendroutine", tasks.get("Abendroutine", []), False),
         ("Nebenmissionen", tasks.get("Nebenmissionen", []), True)
     ]:
@@ -165,7 +165,7 @@ col1, col2, col3, col4, col5 = st.columns([1,1,1,1,1.5])
 with col1:
     show_tasks("Morgenroutine", tasks.get("Morgenroutine", []))
 with col2:
-    show_tasks(f"Wochenplan {weekday_de}", tasks.get("Wochenplan", {}).get(weekday_de, []))
+    show_tasks(f"Wochenplan {day_de}", tasks.get("Wochenplan", {}).get(day_de, []))
 with col3:
     show_tasks("Abendroutine", tasks.get("Abendroutine", []))
 with col4:
@@ -194,9 +194,16 @@ with col5:
 # --- Wochenchart ---
 all_log = pd.concat([logdf, pd.DataFrame([{"Datum": selected_date, "XP": xp_today}])], ignore_index=True)
 all_log["Datum"] = pd.to_datetime(all_log["Datum"], errors="coerce").dt.normalize()
-week = all_log[all_log["Datum"] >= (pd.to_datetime(datetime.date.today() - datetime.timedelta(days=6)))].set_index("Datum").sort_index()
+week = (
+    all_log[all_log["Datum"] >= (pd.to_datetime(datetime.date.today() - datetime.timedelta(days=6)))]
+    .groupby("Datum", as_index=True)["XP"]
+    .sum()
+    .sort_index()
+)
+
 date_range = pd.date_range(datetime.date.today() - datetime.timedelta(days=6), datetime.date.today())
-chart = week["XP"].reindex(date_range, fill_value=0)
+chart = week.reindex(date_range, fill_value=0)
+
 st.bar_chart(chart, use_container_width=True)
 
 # --- Reset-Button ---
