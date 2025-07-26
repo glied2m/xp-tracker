@@ -207,6 +207,7 @@ last7 = all_log[all_log.index >= today - pd.Timedelta(days=6)]
 monat = all_log[all_log.index >= today.replace(day=1)]
 gesamt = all_log
 
+
 st.markdown("### XP-Tabelle")
 st.dataframe(last7.reset_index(), use_container_width=True)
 st.markdown(f"XP Ø letzte 7 Tage: **{last7['XP'].mean():.2f}**, Monat: **{monat['XP'].sum()}**, Gesamt: **{gesamt['XP'].sum()}**")
