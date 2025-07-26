@@ -8,8 +8,6 @@ from fastapi import FastAPI, Request
 import uvicorn
 import threading
 
-
-
 # --- Datei-Pfade ---
 TASKS_FILE = "xp_tasks.json"
 XP_LOG_JSON = "xp_log.json"
@@ -172,27 +170,14 @@ def calc_xp(date):
 
 # --- Layout mit Aufgaben ---
 col1, col2, col3, col4, col5 = st.columns([1,1,1,1,1.5])
-
-from itertools import cycle
-cols = cycle(st.columns(4))  # max. 4 Spalten nebeneinander
-
-for section, items in tasks.items():
-    # Sonderfall Wochenplan
-    if section == "Wochenplan":
-        day_items = items.get(weekday_de, [])
-        if day_items:
-            col = next(cols)
-            with col:
-                show_tasks(f"Wochenplan {weekday_de}", day_items)
-        continue
-
-    # Nebenmissionen speziell behandeln
-    is_neben = section == "Nebenmissionen"
-    if isinstance(items, list) and items:
-        col = next(cols)
-        with col:
-            show_tasks(section, items, is_neben=is_neben)
-
+with col1:
+    show_tasks("Morgenroutine", tasks.get("Morgenroutine", []))
+with col2:
+    show_tasks(f"Wochenplan {weekday_de}", tasks.get("Wochenplan", {}).get(weekday_de, []))
+with col3:
+    show_tasks("Abendroutine", tasks.get("Abendroutine", []))
+with col4:
+    show_tasks("Nebenmissionen", tasks.get("Nebenmissionen", []), is_neben=True)
 with col5:
     xp_today = calc_xp(selected_date)
     st.markdown(f"**XP heute:** {xp_today}")
@@ -220,8 +205,9 @@ all_log["Datum"] = pd.to_datetime(all_log["Datum"], errors="coerce").dt.normaliz
 all_log = all_log.dropna(subset=["Datum"])
 all_log = all_log.groupby("Datum").sum().sort_index()
 
-last7 = all_log[all_log.index >= datetime.date.today() - datetime.timedelta(days=6)]
-monat = all_log[all_log.index >= datetime.date.today().replace(day=1)]
+today = pd.Timestamp.today().normalize()
+last7 = all_log[all_log.index >= today - pd.Timedelta(days=6)]
+monat = all_log[all_log.index >= today.replace(day=1)]
 gesamt = all_log
 
 st.markdown("### XP-Tabelle")
