@@ -5,8 +5,7 @@ import datetime
 import os
 from github import Github
 
-import uvicorn
-import threading
+
 
 # --- Datei-Pfade ---
 TASKS_FILE = "xp_tasks.json"
