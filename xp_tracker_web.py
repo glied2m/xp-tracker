@@ -4,9 +4,6 @@ import pandas as pd
 import datetime
 import os
 from github import Github
-from fastapi import FastAPI, Request
-import uvicorn
-import threading
 
 # --- Datei-Pfade ---
 TASKS_FILE = "xp_tasks.json"
@@ -16,7 +13,7 @@ STATUS_FILE = "today_status.json"
 DAILY_LOG_FILE = "daily_log.json"
 
 # --- GitHub Upload-Konfiguration ---
-GITHUB_TOKEN = st.secrets["github_token"]  # In Streamlit Secrets speichern
+GITHUB_TOKEN = st.secrets["github_token"]
 GITHUB_REPO = "glied2m/xp-tracker"
 
 # --- Belohnungen ---
@@ -121,7 +118,7 @@ def save_daily_log(date, checked_tasks):
 # --- Start Streamlit App ---
 st.set_page_config("XP Tracker", page_icon="🧐", layout="wide")
 st.title(" XP-Tracker ")
-st.caption("Web-App für Felix | API + XP-Statistik")
+st.caption("Web-App für Felix | Tagesplanung & XP-Statistik")
 
 tasks = load_tasks()
 logdf = load_xp_log()
@@ -220,24 +217,19 @@ if st.button("🔁 Nebenmissionen zurücksetzen"):
     save_missions_done(missions_done)
     st.success("Alle Nebenmissionen wurden zurückgesetzt.")
 
-# --- Mini-API für GPT ---
-app = FastAPI()
+# --- Editor für Routinen ---
+st.markdown("---")
+st.markdown("### 🛠️ Aufgaben bearbeiten")
+option = st.selectbox("Welche Kategorie möchtest du bearbeiten?", list(tasks.keys()))
 
-@app.post("/update_task")
-async def update_task(req: Request):
-    data = await req.json()
-    tasks = load_tasks()
-    section = data.get("section")
-    new_task = data.get("task")
-    xp = data.get("xp", 1)
-    if section in tasks:
-        tasks[section].append({"task": new_task, "xp": xp})
-    else:
-        tasks[section] = [{"task": new_task, "xp": xp}]
-    save_tasks(tasks)
-    return {"status": "ok", "message": f"Task hinzugefügt in {section}"}
-
-def run_api():
-    uvicorn.run(app, host="0.0.0.0", port=8000)
-
-threading.Thread(target=run_api).start()
+if option:
+    with st.form("edit_tasks"):
+        new_tasks = st.text_area("Aufgaben im JSON-Format bearbeiten", json.dumps(tasks[option], ensure_ascii=False, indent=2), height=300)
+        if st.form_submit_button("Speichern"):
+            try:
+                parsed = json.loads(new_tasks)
+                tasks[option] = parsed
+                save_tasks(tasks)
+                st.success("Änderungen gespeichert.")
+            except Exception as e:
+                st.error(f"Fehler beim Parsen des JSON: {e}")
