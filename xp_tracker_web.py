@@ -4,6 +4,9 @@ import pandas as pd
 import datetime
 import os
 from github import Github
+from fastapi import FastAPI, Request
+import uvicorn
+import threading
 
 # --- Datei-Pfade ---
 TASKS_FILE = "xp_tasks.json"
@@ -32,6 +35,11 @@ def load_tasks():
             return json.load(f)
         except json.JSONDecodeError:
             return {}
+
+def save_tasks(data):
+    with open(TASKS_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    save_file_and_upload(TASKS_FILE)
 
 def load_xp_log():
     if not os.path.exists(XP_LOG_JSON):
@@ -110,15 +118,16 @@ def save_daily_log(date, checked_tasks):
         json.dump(all_logs, f, ensure_ascii=False, indent=2)
     save_file_and_upload(DAILY_LOG_FILE)
 
-# --- Start der App ---
+# --- Start Streamlit App ---
 st.set_page_config("XP Tracker", page_icon="🧐", layout="wide")
 st.title(" XP-Tracker ")
-st.caption("Web-App für Felix | Automatisch einmalige Nebenmissionen ausblenden")
+st.caption("Web-App für Felix | API + XP-Statistik")
 
 tasks = load_tasks()
 logdf = load_xp_log()
 missions_done = load_missions_done()
 
+# --- Auswahl Tag ---
 tage_de = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
 selected_date = st.date_input("Für welchen Tag Aufgaben & XP bearbeiten?", value=datetime.date.today())
 weekday_de = tage_de[selected_date.weekday()]
@@ -159,7 +168,7 @@ def calc_xp(date):
                 xp += t['xp']
     return xp
 
-# --- Layout ---
+# --- Layout mit Aufgaben ---
 col1, col2, col3, col4, col5 = st.columns([1,1,1,1,1.5])
 with col1:
     show_tasks("Morgenroutine", tasks.get("Morgenroutine", []))
@@ -190,20 +199,44 @@ with col5:
         save_missions_done(missions_done)
         st.success(f"XP für {selected_date:%d.%m.%Y} gespeichert!")
 
-# --- Wochenchart ---
+# --- XP-Tabelle ---
 all_log = pd.concat([logdf, pd.DataFrame([{"Datum": selected_date, "XP": xp_today}])], ignore_index=True)
 all_log["Datum"] = pd.to_datetime(all_log["Datum"], errors="coerce").dt.normalize()
-week = all_log[
-    all_log["Datum"] >= (datetime.date.today() - datetime.timedelta(days=6))
-].set_index("Datum").sort_index()
+all_log = all_log.dropna(subset=["Datum"])
+all_log = all_log.groupby("Datum").sum().sort_index()
 
-week = week.groupby(week.index).sum()  # Duplikate zusammenfassen
-date_range = pd.date_range(datetime.date.today() - datetime.timedelta(days=6), datetime.date.today())
-chart = week["XP"].reindex(date_range, fill_value=0)
-st.bar_chart(chart, use_container_width=True)
+last7 = all_log[all_log.index >= datetime.date.today() - datetime.timedelta(days=6)]
+monat = all_log[all_log.index >= datetime.date.today().replace(day=1)]
+gesamt = all_log
 
-# --- Reset-Button ---
+st.markdown("### XP-Tabelle")
+st.dataframe(last7.reset_index(), use_container_width=True)
+st.markdown(f"XP Ø letzte 7 Tage: **{last7['XP'].mean():.2f}**, Monat: **{monat['XP'].sum()}**, Gesamt: **{gesamt['XP'].sum()}**")
+
+# --- Reset ---
 if st.button("🔁 Nebenmissionen zurücksetzen"):
     missions_done.clear()
     save_missions_done(missions_done)
     st.success("Alle Nebenmissionen wurden zurückgesetzt.")
+
+# --- Mini-API für GPT ---
+app = FastAPI()
+
+@app.post("/update_task")
+async def update_task(req: Request):
+    data = await req.json()
+    tasks = load_tasks()
+    section = data.get("section")
+    new_task = data.get("task")
+    xp = data.get("xp", 1)
+    if section in tasks:
+        tasks[section].append({"task": new_task, "xp": xp})
+    else:
+        tasks[section] = [{"task": new_task, "xp": xp}]
+    save_tasks(tasks)
+    return {"status": "ok", "message": f"Task hinzugefügt in {section}"}
+
+def run_api():
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+
+threading.Thread(target=run_api).start()
