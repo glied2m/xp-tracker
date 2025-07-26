@@ -1,3 +1,6 @@
 streamlit
 pandas
 PyGithub
+fastapi
+threading
+uvicorn
