@@ -4,7 +4,7 @@ import pandas as pd
 import datetime
 import os
 from github import Github
-from fastapi import FastAPI, Request
+
 import uvicorn
 import threading
 
