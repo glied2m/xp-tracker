@@ -3,7 +3,7 @@ import json
 import pandas as pd
 import datetime
 import os
-from github import github
+
 
 # --- Datei-Pfade ---
 TASKS_FILE = "xp_tasks.json"
