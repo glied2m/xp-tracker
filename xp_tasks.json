@@ -46,3 +46,59 @@
     {"task": "Bewerbung schreiben/versenden", "xp": 20}
   ]
 }
+{
+  "Mini-Routinen & Selfcare": [
+    {
+      "task": "Hände eincremen oder Gesichtspflege",
+      "xp": 1
+    },
+    {
+      "task": "Katze bürsten oder streicheln",
+      "xp": 2
+    },
+    {
+      "task": "Fenster kurz auf & lüften",
+      "xp": 1
+    },
+    {
+      "task": "5 Minuten chillen ohne Handy",
+      "xp": 1
+    }
+  ],
+  "Mikropausen": [
+    {
+      "task": "Musik hören / 1 Lied bewusst genießen",
+      "xp": 1
+    },
+    {
+      "task": "Augen zu und 5x tief atmen",
+      "xp": 1
+    },
+    {
+      "task": "Dehnen oder 10 Sekunden tanzen",
+      "xp": 1
+    },
+    {
+      "task": "Wasser trinken & durchatmen",
+      "xp": 1
+    }
+  ],
+  "Haushalt – Micro-Quests": [
+    {
+      "task": "Couch zusammenklappen oder zurechtrücken",
+      "xp": 1
+    },
+    {
+      "task": "Saugroboter leeren oder aktivieren",
+      "xp": 2
+    },
+    {
+      "task": "1 Fläche abwischen (Tisch oder Herd)",
+      "xp": 1
+    },
+    {
+      "task": "Spülmaschine starten oder leeren",
+      "xp": 2
+    }
+  ]
+}
