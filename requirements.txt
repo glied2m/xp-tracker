@@ -4,3 +4,4 @@ PyGithub
 fastapi
 threading
 uvicorn
+matplotlib
