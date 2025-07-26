@@ -201,6 +201,8 @@ all_log = pd.concat([logdf, pd.DataFrame([{"Datum": selected_date, "XP": xp_toda
 all_log["Datum"] = pd.to_datetime(all_log["Datum"], errors="coerce").dt.normalize()
 all_log = all_log.dropna(subset=["Datum"])
 all_log = all_log.groupby("Datum").sum().sort_index()
+all_log.index = pd.to_datetime(all_log.index, errors="coerce")  # Fix: Index als datetime setzen
+all_log = all_log.dropna()
 
 today = pd.Timestamp.today().normalize()
 last7 = all_log[all_log.index >= today - pd.Timedelta(days=6)]
